@@ -1,9 +1,10 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -27,12 +28,20 @@ export class UserService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { name } = createUserDto;
-    return this.prisma.user.create({
-      data: {
-        name,
-      },
-    });
+    console.log('Received createUserDto:', createUserDto);
+    try {
+      return await this.prisma.user.create({
+        data: createUserDto,
+      });
+    } catch (error) {
+      console.error('Error in createUser service:', error.message);
+      throw new BadRequestException({
+        message: 'Error creating user',
+        details: error.message.includes('unique constraint')
+          ? ['User with this name already exists']
+          : [error.message],
+      });
+    }
   }
 
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {

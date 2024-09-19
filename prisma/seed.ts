@@ -19,7 +19,7 @@ async function main() {
     data: [
       {
         date: new Date('2024-06-04'),
-        userId: 39,
+        userId: 1,
         type: 'Revenue',
         amount: 1065,
         description: 'pymt',
@@ -27,7 +27,7 @@ async function main() {
       },
       {
         date: new Date('2024-06-05'),
-        userId: 42,
+        userId: 4,
         type: 'Revenue',
         amount: 1204,
         description: 'pymt',
@@ -35,9 +35,9 @@ async function main() {
       },
       {
         date: new Date('2024-06-08'),
-        userId: 40,
+        userId: 2,
         type: 'Revenue',
-        amount: 0,
+        amount: 2,
         description: 'pymt',
         categoryId: 3,
       },
@@ -67,7 +67,7 @@ async function main() {
       },
       {
         date: new Date('2024-06-17'),
-        userId: 39,
+        userId: 1,
         type: 'Revenue',
         amount: 1500,
         description: 'pymt',
@@ -75,6 +75,44 @@ async function main() {
       },
     ],
     skipDuplicates: true,
+  });
+  await prisma.budget.create({
+    data: {
+      name: 'Personal Account',
+      estimatedRevenue: 2000,
+      categories: {
+        create: [
+          { categoryId: 1, estimate: 50 },
+          { categoryId: 2, estimate: 1500 },
+        ],
+      },
+      users: {
+        create: [{ userId: 1, estimate: 1550 }],
+      },
+      alertOverbudget: true,
+      alertOverAmount: true,
+      alertAmount: 1000,
+      overbudget: false,
+    },
+  });
+  await prisma.budget.create({
+    data: {
+      name: 'Joint Account',
+      estimatedRevenue: 3870,
+      categories: {
+        create: [{ categoryId: 3, estimate: 3870 }],
+      },
+      users: {
+        create: [
+          { userId: 1, estimate: 1333 },
+          { userId: 4, estimate: 1204 },
+          { userId: 2, estimate: 1333 },
+        ],
+      },
+      alertOverbudget: false,
+      alertOverAmount: false,
+      overbudget: false,
+    },
   });
 }
 

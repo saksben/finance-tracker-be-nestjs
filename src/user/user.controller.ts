@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,7 +11,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User as UserModel, Prisma } from '@prisma/client';
+import { User as UserModel } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -35,8 +36,20 @@ export class UserController {
 
   @Post()
   async createUser(@Body() createUserDto: CreateUserDto): Promise<UserModel> {
-    console.log('POST worked');
-    return this.userService.createUser(createUserDto);
+    try {
+      console.log('POST worked');
+      return await this.userService.createUser(createUserDto);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      if (error.response && error.response.details) {
+        throw new BadRequestException({
+          message: 'Validation failed',
+          details: error.response.details,
+        });
+      } else {
+        throw new BadRequestException('Error adding user');
+      }
+    }
   }
 
   @Put(':id')

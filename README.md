@@ -88,6 +88,20 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 ## Steps
 Run this at the start to migrate database: npx prisma migrate dev --name init
 Then this to populate it with default values: npx prisma db seed
+  If you need to flush and reset the db: 
+    First end active sessions in psql with: 
+      SELECT pg_terminate_backend(pid)
+      FROM pg_stat_activity
+      WHERE datname = 'finance_tracker' 
+      AND pid <> pg_backend_pid();
+    Then drop the db:
+      DROP DATABASE finance_tracker;
+    Then restart the db:
+      CREATE DATABASE finance_tracker;
+    Then migrate your orm again and seed it:
+      npx prisma migrate dev --name flush-db
+      npx prisma generate
+      npx prisma db seed
   Can automate this by putting this in package.json: {
   "scripts": {
     "start": "node server.js",
