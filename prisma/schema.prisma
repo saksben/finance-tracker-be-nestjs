@@ -14,32 +14,56 @@ datasource db {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   name          String
-  // email         String    @unique
-  // budgets       Budget[]
+  // email         String       @unique
+  budgets       BudgetUser[]
   transactions  Transaction[]
-  // createdAt     DateTime  @default(now())
-  // updatedAt     DateTime  @updatedAt
+  // createdAt     DateTime     @default(now())
+  // updatedAt     DateTime     @updatedAt
 }
 
-// model Budget {
-//   id            Int             @id @default(autoincrement())
-//   name          String
-//   amount        Float
-//   transactions  Transaction[]
-//   userId        Int
-//   user          User            @relation(fields: [userId], references: [id])
-//   createdAt     DateTime        @default(now())
-//   updatedAt     DateTime        @updatedAt
-// }
+model Budget {
+  id                 Int                @id @default(autoincrement())
+  name               String
+  estimatedRevenue   Float
+  categories         BudgetCategory[]
+  // transactions       Transaction[]
+  // userId             Int
+  users              BudgetUser[]
+  alertOverbudget    Boolean            @default(false)
+  alertOverAmount    Boolean            @default(false)
+  alertAmount        Float?
+  overbudget         Boolean            @default(false)
+  // createdAt          DateTime          @default(now())
+  // updatedAt          DateTime          @updatedAt
+}
+
+model BudgetUser {
+  id        Int   @id @default(autoincrement())
+  budgetId  Int
+  userId    Int
+  estimate  Float
+  budget    Budget  @relation(fields: [budgetId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+  @@unique([budgetId, userId]) // ensure unique combination of budget and user
+}
+
+model BudgetCategory {
+  id          Int       @id @default(autoincrement())
+  budgetId    Int
+  categoryId  Int
+  estimate    Float
+  budget      Budget    @relation(fields: [budgetId], references: [id])
+  category    Category  @relation(fields: [categoryId], references: [id])
+}
 
 model Transaction {
   id          Int       @id @default(autoincrement())
   date        DateTime
   userId      Int?
   user        User?      @relation(fields: [userId], references: [id])
-  type        String
+  type        TransactionType
   amount      Float
   description String
   categoryId  Int
@@ -50,10 +74,16 @@ model Transaction {
   // updatedAt   DateTime  @updatedAt
 }
 
+enum TransactionType {
+  Expense
+  Revenue
+}
+
 model Category {
-  id    Int   @id @default(autoincrement())
-  name  String
+  id            Int   @id @default(autoincrement())
+  name          String
   transactions  Transaction[]
+  budgets       BudgetCategory[]
   // createdAt   DateTime  @default(now())
   // updatedAt   DateTime  @updatedAt
 }
